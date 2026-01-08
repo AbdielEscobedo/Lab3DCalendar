@@ -41,7 +41,16 @@ app.use('/api/reservations', reservationRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Start
-app.listen(PORT, async () => {
-    console.log(`Server running on port ${PORT}`);
-    await syncDatabase();
-});
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, async () => {
+        console.log(`Server running on port ${PORT}`);
+        await syncDatabase();
+    });
+} else {
+    // For Vercel, we need to sync DB on first request or similar, 
+    // but for now let's just export. Vercel cold starts might make sync expensive.
+    // Ideally we run migrations in build step.
+    syncDatabase();
+}
+
+module.exports = app;
